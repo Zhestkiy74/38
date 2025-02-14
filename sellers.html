@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Для продавцов</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style-sellers.css">
+</head>
+<body>
+    <header>
+        <h1>Центр по продаже автомобилей</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="buyers.html">Для покупателей</a></li>
+                <li><a href="sellers.html">Для продавцов</a></li>
+                <li><a href="admin.html">Администрация</a></li>
+                <li id="profileLink" style="display: none;" class="dropdown">
+                    <span id="usernameDisplay"></span>
+                    <div class="dropdown-content">
+                        <a href="#" id="logoutButton">Выход</a>
+                    </div>
+                </li>
+                <li><a href="login.html" id="loginLink" style="display: inline;">Вход</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Раздел для продавцов</h2>
+        <section>
+            <h3>Добавление автомобиля</h3>
+            <form id="addCarForm">
+                <label for="brand">Марка:</label>
+                <select id="brand" name="brand" required>
+                    <option value="">Выберите марку</option>
+                    <option value="Toyota">Toyota</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Ford">Ford</option>
+                    <option value="BMW">BMW</option>
+                    <option value="Mercedes">Mercedes</option>
+                </select>
+
+                <label for="model">Модель:</label>
+                <select id="model" name="model" required>
+                    <option value="">Выберите модель</option>
+                </select>
+
+                <label for="year">Год:</label>
+                <select id="year" name="year" required>
+                    <option value="">Выберите год</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                    <option value="2019">2019</option>
+                </select>
+
+                <label for="price">Цена:</label>
+                <input type="text" id="price" name="price" placeholder="Введите цену">
+
+                <label for="image" class="xe">Изображение:</label>
+                <input type="text" class="xe" id="image" name="image" placeholder="Введите URL изображения">
+
+                <button type="submit">Добавить автомобиль</button>
+            </form>
+        </section>
+
+        <section>
+            <h3>Добавленные автомобили</h3>
+            <div class="results" id="addedCarsContainer">
+                <!-- Добавленные автомобили будут отображены здесь -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Центр по продаже автомобилей</p>
+    </footer>
+
+    <script>
+        // Проверка авторизации пользователя
+        const username = localStorage.getItem('username');
+        const email = localStorage.getItem('email');
+
+        if (username && email) {
+            document.getElementById('usernameDisplay').innerText = username;
+            document.getElementById('profileLink').style.display = 'inline-block';
+            document.getElementById('loginLink').style.display = 'none';
+        } else {
+            document.getElementById('profileLink').style.display = 'none';
+            document.getElementById('loginLink').style.display = 'inline';
+        }
+
+        // Обработка выхода
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            localStorage.removeItem('username');
+            localStorage.removeItem('email');
+            localStorage.removeItem('password');
+            window.location.reload(); // Перезагрузка страницы
+        });
+
+        // Данные моделей в зависимости от марки
+        const models = {
+            Toyota: ["Corolla", "Camry", "RAV4"],
+            Honda: ["Civic", "Accord", "CR-V"],
+            Ford: ["Focus", "Mustang", "Explorer"],
+            BMW: ["X5", "3 Series", "5 Series"],
+            Mercedes: ["C-Class", "E-Class", "GLA"]
+        };
+
+        // Обновление списка моделей в зависимости от выбранной марки
+        document.getElementById('brand').addEventListener('change', function() {
+            const brand = this.value;
+            const modelSelect = document.getElementById('model');
+            modelSelect.innerHTML = '<option value="">Выберите модель</option>'; // Сброс списка моделей
+
+            if (brand && models[brand]) {
+                models[brand].forEach(function(model) {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Обработка добавления автомобиля
+        document.getElementById('addCarForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Предотвращаем отправку формы
+
+            const brand = document.getElementById('brand').value;
+            const model = document.getElementById('model').value;
+            const year = document.getElementById('year').value;
+            const price = document.getElementById('price').value;
+            const image = document.getElementById('image').value;
+
+            const addedCarsContainer = document.getElementById('addedCarsContainer');
+            const newCard = document.createElement('div');
+            newCard.className = 'car-card';
+
+            // Добавляем изображение автомобиля
+            const carImage = document.createElement('img');
+            carImage.src = image; // Используем URL изображения
+            carImage.alt = `${brand} ${model}`;
+
+            const carInfo = document.createElement('div');
+            carInfo.innerHTML = `<h4>${brand} ${model} (${year})</h4>`;
+            
+            const carPrice = document.createElement('div');
+            carPrice.className = 'price';
+            carPrice.textContent = `Цена: ${price} руб.`; // Используем введенную цену
+
+            const viewButton = document.createElement('button');
+            
+            viewButton.textContent = 'Просмотр';
+            viewButton.addEventListener('click', function() {
+                // Переход на страницу для покупателя с параметрами марки, модели и года
+                const url = `buyers.html?brand=${brand}&model=${model}&year=${year}`;
+                window.location.href = url;
+            });
+
+            newCard.appendChild(carImage);
+            newCard.appendChild(carInfo);
+            newCard.appendChild(carPrice);
+            newCard.appendChild(viewButton);
+            addedCarsContainer.appendChild(newCard);
+
+            // Очистка полей после добавления
+            document.getElementById('brand').value = '';
+            modelSelect.innerHTML = '<option value="">Выберите модель</option>'; // Сброс списка моделей
+            document.getElementById('year').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('image').value = '';
+        });
+    </script>
+</body>
+</html>
